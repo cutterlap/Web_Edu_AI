@@ -1,0 +1,35 @@
+{
+  // 自动保存
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 500,
+
+  // 缩进统一 2 空格
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+
+  // 保存自动格式化
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // Vue 文件格式化
+  "vue.inlayHints.inlineHandlerLeading": false,
+  "volar.format.initialIndent": true,
+
+  // 关闭多余提示
+  "javascript.suggestionActions.enabled": false,
+  "typescript.suggestionActions.enabled": false,
+  "editor.suggestSelection": "first",
+
+  // 文件关联
+  "files.associations": {
+    "*.cjs": "javascript",
+    "*.vue": "vue"
+  },
+
+  // 忽略不需要看的文件
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/dist": true
+  }
+}
