@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>系统安装 - 企业后台管理系统</title>
+  <!-- 新增：引入 axios 库（解决 is not defined 错误） -->
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .box {
+      background: white;
+      width: 500px;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .title {
+      text-align: center;
+      font-size: 22px;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .item {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: #409eff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: #338eef;
+    }
+
+    .msg {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #409eff;
+    }
+
+    .success {
+      color: #00c48c;
+    }
+
+    .error {
+      color: #f56c6c;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <div class="title">系统一键安装</div>
+
+    <div class="item">
+      <label>数据库主机</label>
+      <input type="text" id="host" value="localhost" placeholder="localhost">
+    </div>
+
+    <div class="item">
+      <label>数据库用户名</label>
+      <input type="text" id="user" value="root" placeholder="root">
+    </div>
+
+    <div class="item">
+      <label>数据库密码</label>
+      <input type="text" id="password" placeholder="留空则不填">
+    </div>
+
+    <div class="item">
+      <label>数据库名称</label>
+      <input type="text" id="database" value="test" placeholder="test">
+    </div>
+
+    <button class="btn" onclick="install()">开始一键安装</button>
+    <div id="msg" class="msg"></div>
+  </div>
+
+  <script>
+    async function install() {
+      let host = document.getElementById('host').value
+      let user = document.getElementById('user').value
+      let password = document.getElementById('password').value
+      let database = document.getElementById('database').value
+      let msg = document.getElementById('msg')
+
+      msg.innerHTML = '正在检测数据库连接...'
+      msg.className = 'msg'
+
+      // 测试连接
+      try {
+        const res = await axios.post('/install/test-db', { host, user, password, database });
+        if (res.data.code !== 200) {
+          msg.innerText = '数据库连接失败：' + res.data.msg;
+          msg.style.color = 'red';
+          return; // 连接失败则终止安装流程
+        }
+        msg.innerText = res.data.msg; // 显示连接成功信息
+        msg.style.color = 'green';
+      } catch (err) {
+        msg.innerText = '数据库连接失败：' + err.message;
+        msg.style.color = 'red';
+        return; // 异常情况也终止安装流程
+      }
+
+      // 数据库连接成功后，执行安装
+      msg.innerHTML = '正在创建表、初始化数据...';
+      try {
+        let installRes = await fetch('/install/run-install', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ host, user, password, database })
+        }).then(res => res.json());
+
+        if (installRes.code === 0) {
+          msg.innerHTML = '✅ 安装成功！请关闭本页面，前往后台登录';
+          msg.className = 'msg success';
+        } else {
+          msg.innerHTML = '❌ 安装失败：' + installRes.msg;
+          msg.className = 'msg error';
+        }
+      } catch (err) {
+        msg.innerHTML = '❌ 安装失败：' + err.message;
+        msg.className = 'msg error';
+      }
+    }
+  </script>
+
+</body>
+
+</html>
